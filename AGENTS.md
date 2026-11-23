@@ -28,7 +28,7 @@ The shared OpenCode layer for the `simpsonm09-projects` organization, and the Cl
 - `maxstack` composes this layer above the PStack base and below the personal layer.
 - Skills: `service-integrations`, `repo-tasks`, `repo-standard`, `local-services`, `review-session-history`, `machine-inventory`.
 - The README covers the contents, the gate, the layering, the known limits, and the layer contract.
-- Hooks: `just hooks` installs the shared Lefthook jobs from `simpsonm09-projects/.github` at the `hooks-v2` tag; `lefthook-local.yml` is git-ignored. Never skip a hook: no `LEFTHOOK=0`, no `--no-verify`, and never create `lefthook-local.yml` (C7.11). The ruleset is the real gate.
+- Hooks: `just hooks` installs the shared Lefthook jobs from `simpsonm09-projects/.github` at the `hooks-v3` tag; `lefthook-local.yml` is git-ignored. Never skip a hook: no `LEFTHOOK=0`, no `--no-verify`, and never create `lefthook-local.yml` (C7.11). The ruleset is the real gate.
 
 ## Skills
 
