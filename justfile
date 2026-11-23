@@ -16,15 +16,15 @@ deps:
     mise exec -- bun install --frozen-lockfile
 
 # Format JavaScript and TypeScript with Bun.
-fmt:
-    mise exec -- bun fmt index.ts access.mjs gate.mjs hooks lib bin pi tests scripts
+fmt *files:
+    mise exec -- node scripts/fmt.mjs {{files}}
 
 # Check JavaScript and TypeScript formatting with Bun.
 fmt-check:
     mise exec -- bun fmt --check index.ts access.mjs gate.mjs hooks lib bin pi tests scripts
 
 # Lint JavaScript and TypeScript, through Bun with an oxlint fallback.
-lint:
+lint *files:
     mise exec -- bun scripts/lint.ts
 
 # Run the AI-slop gate.
@@ -53,9 +53,9 @@ complexity:
 # Everything CI requires.
 check: fmt-check lint complexity test
 
-# Install the guarded git hook.
+# Install the shared Lefthook hooks and assert the merged jobs (C7.8).
 hooks:
-    git config --local core.hooksPath .githooks
+    mise exec -- node scripts/hooks.ts
 
 # Check the .agents/skills tree and its .claude/skills links.
 agent-files:
@@ -71,6 +71,44 @@ refresh-gate-resolver:
 
 # Historical alias for `check`, kept for the support template.
 verify: check
+
+# Staged secret scan (C7.10).
+secrets-staged:
+    mise exec -- gitleaks git --staged --redact --no-banner
+
+# Reject env files, private keys, kubeconfigs and files over 5 MB (C7.10).
+forbidden-files *files:
+    mise exec -- node scripts/forbidden-files.ts {{files}}
+
+# actionlint and zizmor over the given workflows, or every workflow (C7.10).
+workflows *files:
+    {{ if files == "" { "mise exec -- actionlint" } else { "mise exec -- actionlint -- " + files } }}
+    {{ if files == "" { "mise exec -- zizmor --quiet .github/workflows" } else { "mise exec -- zizmor --quiet " + files } }}
+
+# shellcheck over the given scripts; nothing to do when none are given (C7.10).
+shellcheck *files:
+    {{ if files == "" { "echo shellcheck: no files to check" } else { "mise exec -- shellcheck -- " + files } }}
+
+# Advisory Conventional Commit check (C2.4); never fails the commit (C7.10).
+commit-msg file:
+    mise exec -- node scripts/commit-msg.ts {{quote(file)}}
+
+# Read the pushed refs from stdin, refuse main, and scan the range (C7.10).
+hook-pre-push:
+    mise exec -- node scripts/git-hook.ts pre-push
+
+# Fast pre-push subset, under 30 seconds (C7.10).
+pre-push-check:
+    just fmt-check
+    just complexity
+
+# Refresh locked dependencies when a manifest changed (C7.10).
+deps-refresh *files:
+    {{ if files == "" { "mise exec -- node scripts/deps-refresh.ts mise.toml bun.lock" } else { "mise exec -- node scripts/deps-refresh.ts " + files } }}
+
+# Owner hook: fail when this checkout cannot sign commits (C2.7).
+signing-check:
+    mise exec -- node scripts/signing-check.mjs
 
 # Prune remote-tracking refs and delete local branches merged into main.
 prune:
