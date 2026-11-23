@@ -22,12 +22,6 @@ const FULL = [
   "bun",
   "fmt",
   "index.ts",
-  "access.mjs",
-  "gate.mjs",
-  "hooks",
-  "lib",
-  "bin",
-  "pi",
   "tests",
   "scripts",
 ];

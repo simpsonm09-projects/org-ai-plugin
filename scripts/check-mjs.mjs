@@ -4,22 +4,16 @@
 // formatter and oxlint over each one, so a formatting or lint defect in a runtime `.mjs`
 // fails CI the same way it would in a `.ts` file. It reads the file list from git, so a
 // new untracked module is checked before it is committed.
-//
-// The vendored resolver bundle is generated from the reviewed source object in the
-// standard clone and is verified against its pin (lib/pinned-access.mjs). It is excluded
-// here and marked `linguist-generated` in .gitattributes: it must stay byte-identical, so
-// it is never reformatted.
 
 import { spawnSync } from "node:child_process";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const VENDORED = "runtime/agent-access.mjs";
 const EXTENSIONS = ["*.mjs"];
 
 // Every `.mjs` git knows about: tracked files in CI, plus a new untracked module
-// locally, minus the vendored bundle.
+// locally.
 function mjsFiles() {
   const listed = spawnSync(
     "git",
@@ -42,7 +36,7 @@ function mjsFiles() {
   return listed.stdout
     .split("\n")
     .map((line) => line.trim().replace(/\\/g, "/"))
-    .filter((line) => line.length > 0 && line !== VENDORED);
+    .filter((line) => line.length > 0);
 }
 
 function run(command, args) {
