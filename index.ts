@@ -1,58 +1,13 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Plugin } from "@opencode/plugin";
-import {
-  defaultScripts,
-  gitReader,
-  levelFor,
-  loadAccessApi,
-  loadTokenApi,
-  resolveAccess,
-  tokenFor,
-} from "./access.mjs";
-import { contextLine, gateShellEdit } from "./gate.mjs";
-import { environmentSnapshot } from "./lib/environment.mjs";
-import { fleetLookup } from "./lib/fleet.mjs";
 
-// This file is an adapter. The rules are in gate.mjs; the decision for a command is
-// gateShellEdit there, and the Claude Code hook applies the same decision.
+// This file is the OpenCode plugin entrypoint. It registers the organization skills
+// under skills/. It decides nothing about shell commands or GitHub writes: agents use
+// the owner's accounts, and the rulesets, required checks, and hooks are the boundary.
 
 const here = dirname(fileURLToPath(import.meta.url));
-
-// The plugin lives at <workspace>/.opencode/plugins/<name>, so the workspace root is
-// three levels up. It is the trusted workspace for the fleet lookup: a working directory
-// counts as a fleet repository only under this workspace. A caller may point it elsewhere
-// with options.workspaceRoot, as the tests do with a fixture.
-const defaultWorkspaceRoot = resolve(here, "..", "..", "..");
-
-function workspaceRootFor(options: unknown): string {
-  const configured = (options as { workspaceRoot?: unknown } | undefined)
-    ?.workspaceRoot;
-  return typeof configured === "string" && configured.length > 0
-    ? resolve(configured)
-    : defaultWorkspaceRoot;
-}
-
-interface Scripts {
-  access: string;
-  token: string;
-  catalog: string;
-}
-
-// The resolver and broker default to the repo-standard clone in the workspace. A caller
-// may point them elsewhere with options.scripts, which keeps the gate testable in a
-// checkout that has no workspace around it.
-function scriptsFor(options: unknown, workspaceRoot: string): Scripts {
-  const configured = (options as { scripts?: Partial<Scripts> } | undefined)
-    ?.scripts;
-  const defaults = defaultScripts(workspaceRoot);
-  return {
-    access: configured?.access ?? defaults.access,
-    token: configured?.token ?? defaults.token,
-    catalog: defaults.catalog,
-  };
-}
 
 interface SkillSeed {
   id: string;
@@ -116,58 +71,20 @@ export function loadSkills(root: string): SkillSeed[] {
 export default Plugin.define({
   id: "org-ai-plugin",
   async setup(ctx) {
-    const workspaceRoot = workspaceRootFor(ctx.options);
-    const scripts = scriptsFor(ctx.options, workspaceRoot);
-
-    // Load the resolver and broker modules once. The gate calls their exports in-process,
-    // so no interpreter is involved.
-    const accessApi = await loadAccessApi(scripts.access);
-    const tokenApi = await loadTokenApi(scripts.token);
-
     const skills = loadSkills(join(here, "skills"));
-    if (skills.length > 0) {
-      await ctx.skill.transform((editor) => {
-        for (const skill of skills) {
-          if (editor.get(skill.id)) editor.remove(skill.id);
-          editor.add({
-            id: skill.id,
-            name: skill.name,
-            description: skill.description,
-            path: skill.path,
-            content: skill.content,
-          });
-        }
-      });
-    }
+    if (skills.length === 0) return;
 
-    await ctx.shell.hook("create.before", async (input) => {
-      // Every command goes to the gate: outside the fleet it still decides a gh write that
-      // names its destination, and a directory git cannot resolve gets its unknown-answer rule.
-      const found = fleetLookup(input.cwd, workspaceRoot);
-      // Inside the fleet the env is always attached, as before; outside it only when the gate
-      // writes to it, so an outside pass leaves the input as it was.
-      const env = input.env ?? {};
-      await gateShellEdit(input, env, {
-        cwd: input.cwd,
-        lookup: () => found,
-        resolve: (name, observation) =>
-          resolveAccess(accessApi, scripts.catalog, name, observation),
-        git: (dir) => gitReader(dir),
-        env: environmentSnapshot(),
-        tokenFor: (owner, name) =>
-          tokenFor(tokenApi, scripts.token, owner, name),
-      });
-      if (found.repo || found.unresolved || Object.keys(env).length > 0)
-        input.env = env;
-    });
-
-    await ctx.session.hook("context", (event) => {
-      const repo = fleetLookup(ctx.location.directory, workspaceRoot).repo;
-      if (!repo) return;
-      event.system.push({
-        type: "text",
-        text: contextLine(repo, levelFor(accessApi, repo, scripts.catalog)),
-      });
+    await ctx.skill.transform((editor) => {
+      for (const skill of skills) {
+        if (editor.get(skill.id)) editor.remove(skill.id);
+        editor.add({
+          id: skill.id,
+          name: skill.name,
+          description: skill.description,
+          path: skill.path,
+          content: skill.content,
+        });
+      }
     });
   },
 });

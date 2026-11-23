@@ -8,25 +8,13 @@
   "exports": {
     ".": "./index.ts"
   },
-  "pi": {
-    "extensions": [
-      "./pi/index.ts"
-    ]
-  },
   "files": [
     "index.ts",
-    "pi",
-    "access.mjs",
-    "gate.mjs",
     "package.json",
     "skills",
     "README.md",
     ".claude-plugin",
     ".github/plugin",
-    "hooks",
-    "bin",
-    "lib",
-    "runtime",
     "workspace-instructions.md"
   ],
   "scripts": {

@@ -1,8 +1,7 @@
 // What ships. The runtime is the set of files the OpenCode layer and the Claude Code plugin
 // load. This test pins the published list, walks every relative import from the runtime
 // entry points, and checks that each one resolves inside that list and never into tests/.
-// It also checks that every runtime file is reached from an entry point. The Claude manifest
-// and hooks file are checked in tests/claude-plugin.test.ts.
+// It also checks that every runtime file is reached from an entry point.
 
 import assert from "node:assert/strict";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
@@ -24,36 +23,17 @@ const readJson = (name: string) =>
 
 const PUBLISHED = [
   "index.ts",
-  "pi",
-  "gate.mjs",
-  "access.mjs",
   "package.json",
   "skills",
   "README.md",
   ".claude-plugin",
   ".github/plugin",
-  "hooks",
-  "bin",
-  "lib",
-  "runtime",
   "workspace-instructions.md",
 ];
 
-// The files the runtime loads on its own: the OpenCode entry, the two hook scripts, the hook
-// worker they start, and the launcher. Everything else in the runtime must be reached from one of these.
-const ENTRIES = [
-  "index.ts",
-  "pi/index.ts",
-  "hooks/pre-tool-use.mjs",
-  "hooks/session-start.mjs",
-  "hooks/worker.mjs",
-  // Run by the Cursor and Antigravity hook definitions (hooks/*-hooks.json).
-  "hooks/cursor.mjs",
-  "hooks/antigravity.mjs",
-  "bin/with-gh-token.mjs",
-  // The pin loader imports this reviewed source from its verified bytes at runtime.
-  "runtime/agent-access.mjs",
-];
+// The files the runtime loads on its own: the OpenCode entrypoint. Everything else in the
+// runtime must be reached from it.
+const ENTRIES = ["index.ts"];
 
 // The code files under a published path, as paths relative to the root.
 function codeFiles(entry: string): string[] {

@@ -19,7 +19,7 @@ fmt *files:
 
 # Check JavaScript and TypeScript formatting with Bun.
 fmt-check:
-    mise exec -- bun fmt --check index.ts access.mjs gate.mjs hooks lib bin pi tests scripts
+    mise exec -- bun fmt --check index.ts tests scripts
 
 # Lint JavaScript and TypeScript, through Bun with an oxlint fallback.
 lint *files:
@@ -53,14 +53,6 @@ hooks:
 # Check the .agents/skills tree and its .claude/skills links.
 agent-files:
     mise exec -- bun scripts/agent-files.mjs
-
-# Check the bundled resolver against the reviewed source object in the standard clone.
-check-gate-resolver:
-    mise exec -- node scripts/refresh-gate-resolver.mjs --check
-
-# Refresh the bundled resolver from the reviewed source object. This never fetches.
-refresh-gate-resolver:
-    mise exec -- node scripts/refresh-gate-resolver.mjs
 
 # Historical alias for `check`, kept for the support template.
 verify: check
