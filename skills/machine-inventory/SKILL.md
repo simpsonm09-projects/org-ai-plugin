@@ -5,7 +5,7 @@ description: Use when a task depends on the fleet machines, such as choosing whe
 
 # Machine inventory
 
-The fleet machine classes live in the `machine-inventory` repository, cloned in the workspace at `projects/repos/machine-inventory`. Each machine is one record at `machines/<id>.json`, and the repository README renders the same records as a table.
+The fleet machine classes live in the public [`sakuragaoka-homelab/machine-inventory`](https://github.com/sakuragaoka-homelab/machine-inventory) repository. Clone it into the workspace at `projects/repos/machine-inventory` when a task needs the records. Each machine is one record at `machines/<id>.json`, and the repository README renders the same records as a table.
 
 ## Read the records
 
