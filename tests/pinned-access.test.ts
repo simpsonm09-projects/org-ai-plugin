@@ -72,7 +72,7 @@ test("the packaged resolver pin names the reviewed artifact and API contract", (
     "decideTarget",
   ]) {
     const partial = { ...apiShape };
-    delete partial[/** @type {keyof typeof apiShape} */ (missing)];
+    delete partial[/** @type {keyof typeof apiShape} */ missing];
     assert.equal(hasPinnedAccessApi(partial), false, missing);
   }
   assert.equal(

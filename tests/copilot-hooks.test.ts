@@ -431,9 +431,8 @@ test("a bash gh read from the Copilot bash tool is rewritten in POSIX form", asy
 });
 
 test("the Claude adapter still denies a PowerShell gh call and says to use Bash", async () => {
-  const { handlePreToolUse: claudePre } = await import(
-    "../hooks/lib/claude.mjs"
-  );
+  const { handlePreToolUse: claudePre } =
+    await import("../hooks/lib/claude.mjs");
   writeCatalog(ws, "read");
   const out = await claudePre(
     {

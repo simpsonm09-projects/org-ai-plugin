@@ -228,9 +228,10 @@ Install the pinned tools, then run what CI runs.
 
 ```bash
 mise install
-npm ci
-mise run lint    # flint over the changed files; CI runs flint run --full
-mise run test    # node --test over tests/
+just deps        # bun install --frozen-lockfile
+just fmt-check   # bun fmt --check over the JavaScript and TypeScript
+just lint        # oxlint through Bun
+just test        # node --test over tests/
 ```
 
 The tests run the packaged resolver against temporary catalog git repositories with committed refs. They do not need a sibling checkout or credentials. `tests/parity.test.ts` compares the current code with recorded HEAD outcomes in `tests/fixtures/parity-golden.json`. The suite covers the skill loader and layer contract, the gate and its helpers, the fleet lookup against real git worktrees, the Claude hook and its entry points, the launcher's trust checks and a real Git Bash run, and the runtime's import graph.

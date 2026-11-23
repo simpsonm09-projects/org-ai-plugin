@@ -1,14 +1,14 @@
-#!/usr/bin/env node
-// Flint's biome patterns stop at `*.ts`/`*.js`/`*.json`, so every committed `.mjs` file is
-// outside the shared lint gate even though it is shipped code. This check runs biome (lint,
-// format, and the organize-imports assist, exactly as Flint's `biome` linter runs it) over each
-// one, so a cognitive-complexity, lint, or formatting defect in a runtime `.mjs` fails CI the same
-// way it would in a `.ts` file. It reads the file list from git, so a new untracked module is
-// checked before it is committed.
+#!/usr/bin/env bun
+// Flint's patterns stop at `*.ts`/`*.js`/`*.json`, so every committed `.mjs` file is
+// outside the shared lint gate even though it is shipped code. This check runs Bun's
+// formatter and oxlint over each one, so a formatting or lint defect in a runtime `.mjs`
+// fails CI the same way it would in a `.ts` file. It reads the file list from git, so a
+// new untracked module is checked before it is committed.
 //
-// The vendored resolver bundle is generated from the reviewed source object in the standard clone
-// and is verified against its pin (lib/pinned-access.mjs). It is excluded here and marked
-// `linguist-generated` in .gitattributes: it must stay byte-identical, so it is never reformatted.
+// The vendored resolver bundle is generated from the reviewed source object in the
+// standard clone and is verified against its pin (lib/pinned-access.mjs). It is excluded
+// here and marked `linguist-generated` in .gitattributes: it must stay byte-identical, so
+// it is never reformatted.
 
 import { spawnSync } from "node:child_process";
 import { dirname, resolve } from "node:path";
@@ -18,11 +18,8 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const VENDORED = "runtime/agent-access.mjs";
 const EXTENSIONS = ["*.mjs"];
 
-// Every `.mjs` git knows about: tracked files in CI, plus a new untracked module locally, minus
-// the vendored bundle.
-/**
- * @returns {string[]}
- */
+// Every `.mjs` git knows about: tracked files in CI, plus a new untracked module
+// locally, minus the vendored bundle.
 function mjsFiles() {
   const listed = spawnSync(
     "git",
@@ -48,6 +45,21 @@ function mjsFiles() {
     .filter((line) => line.length > 0 && line !== VENDORED);
 }
 
+function run(command, args) {
+  const result = spawnSync(command, args, {
+    cwd: root,
+    stdio: "inherit",
+    windowsHide: true,
+  });
+  if (result.error) {
+    process.stderr.write(
+      `check-mjs: could not run ${command}: ${result.error.message}\n`,
+    );
+    return 1;
+  }
+  return result.status ?? 1;
+}
+
 const files = mjsFiles();
 if (files.length === 0) {
   process.stderr.write(
@@ -56,15 +68,6 @@ if (files.length === 0) {
   process.exit(1);
 }
 
-const result = spawnSync("biome", ["check", ...files], {
-  cwd: root,
-  stdio: "inherit",
-  windowsHide: true,
-});
-if (result.error) {
-  process.stderr.write(
-    `check-mjs: could not run biome: ${result.error.message}\n`,
-  );
-  process.exit(1);
-}
-process.exit(result.status ?? 1);
+const formatted = run("bun", ["fmt", "--check", ...files]);
+if (formatted !== 0) process.exit(formatted);
+process.exit(run("oxlint", files));
