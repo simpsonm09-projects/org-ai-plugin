@@ -1,9 +1,7 @@
-// The focused cross-platform regression behind `just test-portable`, the recipe the
-// `test-windows` and `test-macos` jobs run beside the full Linux suite. It drives the
-// plugin's own path, cwd, and shell-word helpers over the inputs that break a naive
-// implementation on a non-POSIX host: a workspace path with a space and non-ASCII
-// characters, both path separators, and a CRLF-terminated command. The full suite
-// stays in `just test`.
+// The path, cwd, and shell-word regression in the full `just test` suite. It drives
+// the plugin's own helpers over the inputs that break a naive implementation: a
+// workspace path with a space and non-ASCII characters, both path separators, and a
+// CRLF-terminated command.
 
 import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";

@@ -1,8 +1,6 @@
 # Cross-platform task runner for humans and agents. `just --list` shows every
 # recipe. Keep each recipe a thin call to a portable tool or a script under
 # scripts/. See https://github.com/simpsonm09-projects/repo-standard/blob/main/docs/task-runner.md
-set windows-shell := ["powershell.exe", "-NoLogo", "-NoProfile", "-Command"]
-
 # List the recipes.
 default:
     @just --list
@@ -34,11 +32,6 @@ aislop:
 # Run the test suite. The suite is node:test, so Node runs it until the Bun port lands.
 test:
     mise exec -- node --test
-
-# Run the focused cross-platform regression on this host. The portable workflow runs
-# this recipe on `main` and weekly, not on the required pull request path.
-test-portable:
-    mise exec -- node --test tests/portable.test.ts tests/gate.test.ts tests/shared-decision.test.ts tests/location.test.ts tests/fleet.test.ts tests/hook-entry.test.ts tests/codex-hooks.test.ts
 
 # Run the tests and write an lcov report to coverage/lcov.info.
 coverage:
