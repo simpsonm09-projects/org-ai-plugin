@@ -121,44 +121,58 @@ async function runFromCopilotPowerShell(command: string) {
   return { status: run.status, stderr: run.stderr, received };
 }
 
-test("a PowerShell gh call with --jq .login runs through the launcher with the exact arguments and the token", {
-  skip: !WINDOWS,
-}, async () => {
-  const run = await runFromCopilotPowerShell("gh api user --jq .login");
-  assert.equal(run.status, 0, run.stderr);
-  assert.deepEqual(run.received, {
-    args: ["api", "user", "--jq", ".login"],
-    token: FIXTURE_TOKEN,
-  });
-});
+test(
+  "a PowerShell gh call with --jq .login runs through the launcher with the exact arguments and the token",
+  {
+    skip: !WINDOWS,
+  },
+  async () => {
+    const run = await runFromCopilotPowerShell("gh api user --jq .login");
+    assert.equal(run.status, 0, run.stderr);
+    assert.deepEqual(run.received, {
+      args: ["api", "user", "--jq", ".login"],
+      token: FIXTURE_TOKEN,
+    });
+  },
+);
 
-test("a PowerShell gh call with a doubled single quote and spaces passes the argument as PowerShell reads it", {
-  skip: !WINDOWS,
-}, async () => {
-  const run = await runFromCopilotPowerShell(
-    `gh search prs 'it''s a test' --jq .items`,
-  );
-  assert.equal(run.status, 0, run.stderr);
-  assert.deepEqual(run.received?.args, [
-    "search",
-    "prs",
-    "it's a test",
-    "--jq",
-    ".items",
-  ]);
-  assert.equal(run.received?.token, FIXTURE_TOKEN);
-});
+test(
+  "a PowerShell gh call with a doubled single quote and spaces passes the argument as PowerShell reads it",
+  {
+    skip: !WINDOWS,
+  },
+  async () => {
+    const run = await runFromCopilotPowerShell(
+      `gh search prs 'it''s a test' --jq .items`,
+    );
+    assert.equal(run.status, 0, run.stderr);
+    assert.deepEqual(run.received?.args, [
+      "search",
+      "prs",
+      "it's a test",
+      "--jq",
+      ".items",
+    ]);
+    assert.equal(run.received?.token, FIXTURE_TOKEN);
+  },
+);
 
-test("a PowerShell gh call with double quotes and spaces passes the argument as PowerShell reads it", {
-  skip: !WINDOWS,
-}, async () => {
-  const run = await runFromCopilotPowerShell(`gh search prs "a b" --jq .items`);
-  assert.equal(run.status, 0, run.stderr);
-  assert.deepEqual(run.received?.args, [
-    "search",
-    "prs",
-    "a b",
-    "--jq",
-    ".items",
-  ]);
-});
+test(
+  "a PowerShell gh call with double quotes and spaces passes the argument as PowerShell reads it",
+  {
+    skip: !WINDOWS,
+  },
+  async () => {
+    const run = await runFromCopilotPowerShell(
+      `gh search prs "a b" --jq .items`,
+    );
+    assert.equal(run.status, 0, run.stderr);
+    assert.deepEqual(run.received?.args, [
+      "search",
+      "prs",
+      "a b",
+      "--jq",
+      ".items",
+    ]);
+  },
+);

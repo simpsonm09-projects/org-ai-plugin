@@ -475,8 +475,7 @@ function isPersonalForkSyncShape(observation, resolved, requireSource = false) {
 
   return Boolean(
     resolved?.org &&
-      observation.destination.owner.toLowerCase() !==
-        resolved.org.toLowerCase(),
+    observation.destination.owner.toLowerCase() !== resolved.org.toLowerCase(),
   );
 }
 
@@ -486,16 +485,14 @@ function isPersonalForkSyncShape(observation, resolved, requireSource = false) {
  * @returns {boolean}
  */
 function hasUnresolvedPersonalForkSyncContext(observation, resolved, deps) {
-  if (
-    !(
-      isPersonalForkSyncShape(observation, resolved, true) &&
-      resolved?.kind === "unknown" &&
-      resolved.source === "unknown" &&
-      resolved.level === "none" &&
-      resolved.destination?.toLowerCase() ===
-        `${observation.destination.owner}/${observation.destination.repo}`.toLowerCase()
-    )
-  )
+  if (!(
+    isPersonalForkSyncShape(observation, resolved, true) &&
+    resolved?.kind === "unknown" &&
+    resolved.source === "unknown" &&
+    resolved.level === "none" &&
+    resolved.destination?.toLowerCase() ===
+      `${observation.destination.owner}/${observation.destination.repo}`.toLowerCase()
+  ))
     return false;
 
   const org = resolved.org;

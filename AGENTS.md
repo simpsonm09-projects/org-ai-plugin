@@ -15,11 +15,11 @@ The shared OpenCode layer for the `simpsonm09-projects` organization, and the Cl
 
 ## Commands
 
-- `just install`, `just lint`, `just test`, `just verify`.
+- `just install`, `just deps`, `just fmt-check`, `just lint`, `just complexity`, `just test`, `just check`, `just agent-files`.
 
 ## Repo facts
 
-- Language and toolchain: TypeScript, Node, and `@opencode/plugin`.
+- Language and toolchain: TypeScript, Node, and `@opencode/plugin`. Bun installs (`bun.lock`), formats and lints; Node runs the `node:test` suite until the Bun port lands.
 - The decision: `gate.mjs` (`decideShell`, `gateShellEdit`). OpenCode applies it through `index.ts`; Claude Code through `hooks/lib/claude.mjs`; the launcher re-runs it in `bin/with-gh-token.mjs`.
 - Worktrees under `projects/worktrees` are fleet repositories in both harnesses. The README lists the intended differences under "Differences from the previous gate": four directory-resolution cases (a worktree, a letter-case variant, a junction, an executable spelling), plus the declared destination-aware decision changes in `tests/fixtures/parity-decisions.json`.
 - The resolver is bundled at `runtime/agent-access.mjs` and verified against its pin in `lib/pinned-access.mjs`; the broker is read from the repo-standard clone in the workspace, through `access.mjs`.
