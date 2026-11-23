@@ -27,7 +27,7 @@ lint *files:
 
 # Run the AI-slop gate.
 aislop:
-    npx --yes aislop@0.16.1 ci
+    mise exec -- aislop ci
 
 # Run the test suite. The suite is node:test, so Node runs it until the Bun port lands.
 test:
